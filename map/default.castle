@@ -1,0 +1,91 @@
+welcome:Hi Player, Welcome to the Default Testing Castle! Take a look around and have fun! <3
+[
+    name:Starting Room
+    [
+        name:Rotten Apple
+        [
+            action:eat,gobble,munch,swallow
+            [
+                health:-10
+                happiness:2
+                string:You eat the apple. You feel a little queasy
+                command:dlo {object};sdp Useless Sword,type,2
+                case:({object.context}=castle & {player.object}={object}) / {object.context}=player
+            ]
+        ]
+        [
+            action:pickup,pick up,grab,obtain
+            defined:pickup
+            [
+                happiness:1
+                string:You pick up the {object}. You see a worm crawl inside
+                command:ati {object}
+                case:{player.object}={object}
+            ]
+            [
+                string:You aren't at the {object}
+            ]
+        ]
+        [
+            action:throw
+            [
+                happiness:5
+                string:The apple hits the wall and {object} juice runs down in rivulets
+                command:dlo {object}
+                case:{object.context}=inventory
+            ]
+        ]
+        [
+            action:move,walk,approach
+            [
+                string:You are already at the {object}
+                case:{player.object} = {object}
+            ]
+            [
+                string:You walk to the {object}
+                command:mto {object}
+            ]
+        ]
+    ]
+    [
+        name:Bunny
+        [
+            inheriting:pickup
+            [
+                happiness:100
+                string:You pick up the {object} and stroke it
+                case:{player.object}={object}
+            ]
+        ]
+    ]
+    [
+        name:Useless Sword
+        type:1
+        [
+            action:pickup
+            [
+                happiness:20
+                string:You pick up the delicate sword and feel accomplished
+                command:ati {object}
+                case:{object.type}=2
+            ]
+            [
+                happiness:-2
+                string:The sword disintegrates into a smokey puff as you pick it up
+            ]
+        ]
+        [
+            action:move
+            [
+                string:The {object} is too high for you to reach
+            ]
+        ]
+        [
+            action:fap
+            [
+                string:You enjoy yourself
+                happiness:20
+            ]
+        ]
+    ]
+]
