@@ -1,11 +1,9 @@
-package main.util;
+package main.reader;
 
 import main.game.Object;
 import main.game.Player;
 import main.game.Room;
 import main.game.util.Command;
-
-import static main.CactiiAndCastles.castle;
 
 public class ActionReader
 {

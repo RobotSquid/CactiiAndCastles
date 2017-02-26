@@ -1,133 +1,33 @@
-package main.util;
+package main.reader;
 
 import main.game.Castle;
-import main.game.Object;
-import main.game.Room;
-import main.game.util.*;
+import main.reader.util.RawTextConstruct;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class MapReader
 {
-
-    private static ArrayList<String> readLinesFromFile(String path)
-    {
-        ArrayList data = new ArrayList<String>();
-        try
-        {
-            FileReader reader = new FileReader(path);
-            BufferedReader textReader = new BufferedReader(reader);
-            String line = "";
-            while (line != null)
-            {
-                line = textReader.readLine();
-                if (line != null)
-                {
-                    data.add(line);
-                }
-            }
-            textReader.close();
-        }
-        catch (Exception e)
-        {
-            System.out.println("Couldn't load map, " + e.getMessage());
-        }
-        return data;
-    }
-
-    private static ArrayList<ArrayList<String>> getSubObjects(ArrayList<String> list)
-    {
-        ArrayList out = new ArrayList<ArrayList<String>>();
-        int parenCount = 0;
-        int start = 0;
-        int end = 0;
-        for (int i = 0; i < list.size(); i++)
-        {
-            String line = list.get(i);
-            for (char c : line.toCharArray())
-            {
-                if (c == '[')
-                {
-                    parenCount++;
-                    if (parenCount == 1)
-                    {
-                        start = i;
-                    }
-                }
-                if (c == ']')
-                {
-                    parenCount--;
-                    if (parenCount == 0)
-                    {
-                        end = i;
-                        out.add(new ArrayList<String>(list.subList(start + 1, end)));
-                    }
-                }
-            }
-        }
-        return out;
-    }
-
-    private static HashMap<String, String> getValues(ArrayList<String> list)
-    {
-        HashMap out = new HashMap<String, String>();
-        String line;
-        String[] parts;
-
-        for (int i = 0; i < list.size() && !list.get(i).contains("["); i++)
-        {
-            line = list.get(i);
-            if (line.contains(":"))
-            {
-                parts = line.split(":");
-
-                String s = parts[0];
-                int start;
-                int end;
-                for (start = 0; start < s.length() && (((int) s.charAt(start) < 33) || ((int) s.charAt(start)) > 122); start++) {}
-                for (end = start; end < s.length() && ((int) s.charAt(end)) > 32 && ((int) s.charAt(end)) < 123; end++) {}
-                parts[0] = parts[0].substring(start, end);
-
-                out.put(parts[0], parts[1]);
-            }
-        }
-        return out;
-    }
-
     public static Castle getCastle(String path)
     {
-        ArrayList<String> input = readLinesFromFile(path);
-
-        HashMap<String, String> castleFields;
-        ArrayList<ArrayList<String>> rooms;
-        HashMap<String, String> roomFields;
-        ArrayList<ArrayList<String>> objects;
-        HashMap<String, String> objectFields;
-        ArrayList<ArrayList<String>> actions;
-        HashMap<String, String> actionFields;
-        ArrayList<ArrayList<String>> cases;
-        HashMap<String, String> caseFields;
-
-        castleFields = getValues(input);
-        rooms = getSubObjects(input);
-
+        //ALL CONSTRUCTS INITIALIZE
+        RawTextConstruct castle = new RawTextConstruct(path);
+        ArrayList<RawTextConstruct> rooms = castle.getConstructs();
+        ArrayList<RawTextConstruct> objects = processSortedList(allSubObjects(rooms));
+        ArrayList<RawTextConstruct> actions = processSortedList(allSubObjects(objects));
 
         //CASTLE DATA
         Castle realCastle = new Castle();
 
-        for (String key : castleFields.keySet())
+        for (String key : castle.getValues().keySet())
         {
             switch (key)
             {
                 case "welcome":
-                    realCastle.setWelcome(castleFields.get(key));
+                    realCastle.setWelcome(castle.getValues().get(key));
                     break;
                 default:
                     System.out.println("No field found in Castle: " + key);
@@ -135,40 +35,15 @@ public class MapReader
             }
         }
 
-        //ORDER OBJECTS
-        HashMap<ArrayList<String>, ArrayList<String>> roomMap = new HashMap<>();
-        ArrayList<ArrayList<String>> rawObjects = new ArrayList<>();
-        for (ArrayList<String> seqRoom : rooms)
-        {
-            for (ArrayList<String> seqObj : getSubObjects(seqRoom))
-            {
-                roomMap.put(seqObj, seqRoom);
-                rawObjects.add(seqObj);
-            }
-        }
-        rawObjects = inheritOrderList(roomMap);
-
-        //ORDER ACTIONS
-        HashMap<ArrayList<String>, ArrayList<String>> objectMap = new HashMap<>();
-        ArrayList<ArrayList<String>> rawActions = new ArrayList<>();
-
-        for (ArrayList<String> seqObj : rawObjects)
-        {
-            for (ArrayList<String> seqAct : getSubObjects(seqObj))
-            {
-                objectMap.put(seqAct, seqObj);
-                rawActions.add(seqAct);
-            }
-        }
-        rawActions = inheritOrderList(objectMap);
-
         //TODO actions parse
 
         //TODO objects parse
 
+
+        /*
         ArrayList<Room> realRooms = new ArrayList<>();
 
-        for (ArrayList<String> room : rooms)
+        for (RawTextConstruct room : rooms)
         {
             roomFields = getValues(room);
             objects = getSubObjects(room);
@@ -192,7 +67,7 @@ public class MapReader
             /*
             ArrayList<Object> realObjects = new ArrayList<>();
 
-            for (ArrayList<String> object : objects)
+            for (RawTextConstruct object : objects)
             {
                 objectFields = getValues(object);
                 actions = getSubObjects(object);
@@ -226,7 +101,7 @@ public class MapReader
 
                 HashMap<String, String> defineMap = new HashMap<>();
 
-                for (ArrayList<String> action : actions)
+                for (RawTextConstruct action : actions)
                 {
                     actionFields = getValues(action);
 
@@ -240,7 +115,7 @@ public class MapReader
 
                 for (int actionN = 0; actionN < actions.size(); actionN++)
                 {
-                    ArrayList<String> action = actions.get(actionN);
+                    RawTextConstruct action = actions.get(actionN);
                     actionFields = getValues(action);
 
                     if (actionFields.containsKey("inheriting"))
@@ -255,7 +130,7 @@ public class MapReader
 
                 ArrayList<Action> realActions = new ArrayList<>();
 
-                for (ArrayList<String> action : actions)
+                for (RawTextConstruct action : actions)
                 {
                     actionFields = getValues(action);
                     cases = getSubObjects(action);
@@ -283,7 +158,7 @@ public class MapReader
 
                     ArrayList<ActionParameters> realCases = new ArrayList<>();
 
-                    for (ArrayList<String> acase : cases)
+                    for (RawTextConstruct acase : cases)
                     {
                         caseFields = getValues(acase);
 
@@ -360,59 +235,48 @@ public class MapReader
             });
 
             realRoom.setObjects(realObjects);
-            */
+
 
             realRooms.add(realRoom);
         }
 
-        realCastle.setRooms(realRooms);
+        realCastle.setRooms(realRooms);*/
 
         return realCastle;
     }
 
-    private static ArrayList<ArrayList<String>> inheritOrderList(HashMap<ArrayList<String>, ArrayList<String>> actions)
+    private static ArrayList<RawTextConstruct> allSubObjects(ArrayList<RawTextConstruct> parents)
     {
-        HashMap<String, String> actionJunctions = new HashMap<>();
-        HashMap<String, String> values;
-
-        for (ArrayList<String> seqObj : actions.keySet())
-        {
-            values = getValues(seqObj);
-            if (values.containsKey("inheriting") && values.containsKey("defined"))
-            {
-                actionJunctions.put(values.get("defined"), values.get("inheriting"));
-            }
-        }
-
-        HashMap<ArrayList<String>, Integer> inheritDepth = new HashMap<>();
-
-        for (ArrayList<String> rawObj : actions.keySet())
-        {
-            HashMap<String, String> rawValues = getValues(rawObj);
-
-            if (rawValues.containsKey("inheriting"))
-            {
-                inheritDepth.put(rawObj, findInheritDepth(rawValues.get("inheriting"), new ArrayList<>(), actionJunctions));
-            }
-            else
-            {
-                inheritDepth.put(rawObj, 0);
-            }
-        }
-
-        ArrayList<ArrayList<String>> out = new ArrayList<>(actions.keySet());
-
-        out.sort((o1, o2) ->
-        {
-            int o1d = inheritDepth.get(o1);
-            int o2d = inheritDepth.get(o2);
-            return o2d < o1d ? -1 : (o1d < o2d ? 1 : 0);
-        });
-
-        return out;
+        final ArrayList<RawTextConstruct> children = new ArrayList<>();
+        parents.stream().forEach(o -> children.addAll(o.getConstructs()));
+        return children;
     }
 
-    private static int findInheritDepth(String inherits, ArrayList<String> inheritsHistory, HashMap<String, String> definingToInheriting)
+    private static ArrayList<RawTextConstruct> processSortedList(ArrayList<RawTextConstruct> sort)
+    {
+        //DEFINED
+        HashMap<String, RawTextConstruct> constructDefined = new HashMap<>();
+        sort.stream().filter(o -> o.getValues().containsKey("defined")).forEach(o -> constructDefined.put(o.getValues().get("defined"), o));
+        //EXTENDING
+        HashMap<RawTextConstruct, RawTextConstruct> constructExtends = new HashMap<>();
+        sort.stream().filter(a -> a.getValues().containsKey("extends") && constructDefined.containsKey(a.getValues().get("extends"))).forEach(a -> constructExtends.put(a, constructDefined.get(a.getValues().get("extends"))));
+        //DEPTH
+        HashMap<RawTextConstruct, Integer> constructInheritDepth = new HashMap<>();
+        sort.stream().forEach(r -> constructInheritDepth.put(r, findInheritDepth(r, new ArrayList<>(), constructExtends)));
+        //SORT
+        sort.sort((o1, o2) -> findProcessPosition(o1, o2, constructInheritDepth));
+
+        return sort;
+    }
+
+    private static Integer findProcessPosition(RawTextConstruct o1, RawTextConstruct o2, HashMap<RawTextConstruct, Integer> inheritDepth)
+    {
+        int o1d = inheritDepth.get(o1);
+        int o2d = inheritDepth.get(o2);
+        return o2d < o1d ? -1 : (o1d < o2d ? 1 : 0);
+    }
+
+    private static int findInheritDepth(RawTextConstruct inherits, ArrayList<RawTextConstruct> inheritsHistory, HashMap<RawTextConstruct, RawTextConstruct> eragon)
     {
         if (inheritsHistory.contains(inherits))
         {
@@ -420,14 +284,14 @@ public class MapReader
         }
         else
         {
-            if (!definingToInheriting.containsKey(inherits))
+            if (!eragon.containsKey(inherits))
             {
                 return 0;
             }
             else
             {
                 inheritsHistory.add(inherits);
-                int nextDepth = findInheritDepth(definingToInheriting.get(inherits), inheritsHistory, definingToInheriting);
+                int nextDepth = findInheritDepth(eragon.get(inherits), inheritsHistory, eragon);
                 if (nextDepth == -1)
                 {
                     return -1;

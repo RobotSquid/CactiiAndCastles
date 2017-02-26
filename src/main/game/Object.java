@@ -1,13 +1,11 @@
 package main.game;
 
 import main.game.util.Action;
-import main.game.util.ActionParameters;
-import main.game.util.Inheritor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Object extends Inheritor
+public class Object
 {
     private String name;
     private boolean existsInWorld = true;
@@ -21,7 +19,7 @@ public class Object extends Inheritor
         name = "Some Unnamed Object";
     }
 
-    public Object(String s, ArrayList h)
+    public Object(String s, ArrayList<Action> h)
     {
         name = s;
         actions = h;
@@ -42,7 +40,7 @@ public class Object extends Inheritor
         return actions;
     }
 
-    public void setActions(ArrayList actions)
+    public void setActions(ArrayList<Action> actions)
     {
         this.actions = actions;
     }
@@ -75,14 +73,5 @@ public class Object extends Inheritor
     public void setVisible(boolean visible)
     {
         this.visible = visible;
-    }
-
-    @Override
-    public void inheritFrom(Inheritor i)
-    {
-        if (i instanceof Object)
-        {
-            Object o = ((Object) i);
-        }
     }
 }

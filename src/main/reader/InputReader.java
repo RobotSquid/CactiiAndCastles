@@ -1,10 +1,9 @@
-package main.util;
+package main.reader;
 
 import main.CactiiAndCastles;
 import main.game.Object;
 import main.game.Player;
 import main.game.Room;
-import main.game.util.ActionParameters;
 import main.game.util.Command;
 
 import java.util.ArrayList;
@@ -99,13 +98,13 @@ public class InputReader
         return null;
     }
 
-    private static String findMatch(String s, Set ba)
+    private static String findMatch(String s, Set<String> ba)
     {
-        ArrayList a = new ArrayList(ba);
+        ArrayList<String> a = new ArrayList<>(ba);
         boolean b = false;
         int i;
         for (i = -1; i < a.size()-1 && !b; i++) {b = s.matches("(?i).*" + a.get(i+1) + ".*");}
-        return b ? ((String) a.get(i)) : null;
+        return b ? a.get(i) : null;
     }
 
     private static String removeFirst(String s, String se)

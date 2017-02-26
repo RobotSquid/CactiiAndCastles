@@ -50,7 +50,7 @@ welcome:Hi Player, Welcome to the Default Testing Castle! Take a look around and
     [
         name:Bunny
         [
-            inheriting:pickup
+            extends:pickup
             [
                 happiness:100
                 string:You pick up the {object} and stroke it
