@@ -25,12 +25,12 @@ public class MapReader
         ArrayList<RawTextConstruct> rawCastles = new ArrayList<RawTextConstruct>() {{add(castle);}};
         ArrayList<Function<BuildConstruct, ConstructableObject>> builders = new ArrayList<Function<BuildConstruct, ConstructableObject>>() {{add(Castle::new);add(Room::new);add(Object::new);add(Action::new);add(Case::new);}};
 
-        HashMap<RawTextConstruct, ConstructableObject> realCastles = buildObjects(rawCastles, builders);
+        HashMap<ExtendingConstruct, ConstructableObject> realCastles = buildObjects(rawCastles, builders);
 
-        return ((Castle) realCastles.get(castle));
+        return ((Castle) ((ArrayList) realCastles.values()).get(0));
     }
 
-    private static HashMap<RawTextConstruct, ConstructableObject> buildObjects(ArrayList<RawTextConstruct> raw, ArrayList<Function<BuildConstruct, ConstructableObject>> builders)
+    private static HashMap<ExtendingConstruct, ConstructableObject> buildObjects(ArrayList<RawTextConstruct> raw, ArrayList<Function<BuildConstruct, ConstructableObject>> builders)
     {
         return buildConstructs(raw, builders.get(0), builders.size() != 0 ? buildObjects(allSubObjects(raw), ((ArrayList<Function<BuildConstruct, ConstructableObject>>) builders.subList(1, builders.size()))) : null);
     }
@@ -42,11 +42,11 @@ public class MapReader
         return children;
     }
 
-    private static HashMap<RawTextConstruct, ConstructableObject> buildConstructs(ArrayList<RawTextConstruct> rawConstructs, Function<BuildConstruct, ConstructableObject> builder, HashMap<RawTextConstruct, ConstructableObject> children)
+    private static HashMap<ExtendingConstruct, ConstructableObject> buildConstructs(ArrayList<RawTextConstruct> rawConstructs, Function<BuildConstruct, ConstructableObject> builder, HashMap<ExtendingConstruct, ConstructableObject> children)
     {
         HashMap<RawTextConstruct, ExtendingConstruct> constructs = new HashMap<>();
         HashMap<String, RawTextConstruct> constructDefined = new HashMap<>();
-        HashMap<RawTextConstruct, ConstructableObject> built = new HashMap<>();
+        HashMap<ExtendingConstruct, ConstructableObject> built = new HashMap<>();
 
         //CONSTRUCT
         rawConstructs.forEach(r -> constructs.put(r, new ExtendingConstruct(r, builder)));
@@ -61,9 +61,9 @@ public class MapReader
         //SORT
         rawConstructs.sort((o1, o2) -> constructs.get(o2).getDepth() < constructs.get(o1).getDepth() ? -1 : (constructs.get(o1).getDepth() < constructs.get(o2).getDepth() ? 1 : 0));
         //INHERIT
-        rawConstructs.forEach(r -> constructs.get(r).extendParent());
+        rawConstructs.forEach(r -> constructs.get(r).extendParent(new ArrayList<>(children.keySet())));
         //BUILD
-        rawConstructs.forEach(r -> built.put(r, constructs.get(r).buildOut(children)));
+        rawConstructs.forEach(r -> built.put(constructs.get(r), constructs.get(r).buildOut(children)));
 
         return built;
     }

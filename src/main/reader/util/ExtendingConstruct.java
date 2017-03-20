@@ -1,6 +1,7 @@
 package main.reader.util;
 
 import main.game.util.ConstructableObject;
+import main.helper.ArrayHelper;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -25,10 +26,16 @@ public class ExtendingConstruct
         this.builder = builder;
     }
 
-    public void extendParent()
+    public void extendParent(ArrayList<ExtendingConstruct> children)
     {
         parent.getRaw().getValues().keySet().stream().filter(k -> !raw.getValues().containsKey(k)).forEach(k -> raw.getValues().put(k, parent.getRaw().getValues().get(k)));
-        //parent.getRaw().getConstructs().stream().filter(c -> )
+
+        if (children != null)
+        {
+            HashMap<RawTextConstruct, String> childrenBase = new HashMap<>();
+            children.forEach(ec -> childrenBase.put(ec.getRaw(), ec.baseName));
+            parent.getRaw().getConstructs().stream().filter(c -> !ArrayHelper.arrayContains(raw.getConstructs(), p -> childrenBase.get(p).equals(childrenBase.get(c)))).forEach(c -> raw.getConstructs().add(c));
+        }
     }
 
     public void calculateBaseName()
@@ -73,13 +80,13 @@ public class ExtendingConstruct
         return depth;
     }
 
-    public ConstructableObject buildOut(HashMap<RawTextConstruct, ConstructableObject> children)
+    public ConstructableObject buildOut(HashMap<ExtendingConstruct, ConstructableObject> children)
     {
         HashMap<String, String> values = raw.getValues();
         ArrayList<ConstructableObject> objects = new ArrayList<>();
         if (children != null)
         {
-            children.keySet().stream().filter(k -> raw.getConstructs().contains(k)).forEach(k -> objects.add(children.get(k)));
+            children.keySet().stream().filter(k -> raw.getConstructs().contains(k.getRaw())).forEach(k -> objects.add(children.get(k)));
         }
         out = builder.apply(new BuildConstruct(values, objects));
         return out;
