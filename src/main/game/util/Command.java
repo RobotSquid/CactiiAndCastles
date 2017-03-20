@@ -1,23 +1,24 @@
 package main.game.util;
 
+import main.game.Case;
 import main.game.Object;
 
 public class Command
 {
-    private ActionParameters action;
+    private Case action;
     private String type;
     private Object object;
     private Object auxiliary;
 
     public Command()
     {
-        this.action = new ActionParameters();
+        this.action = new Case();
         this.type = null;
         this.object = new Object();
         this.auxiliary = null;
     }
 
-    public Command(ActionParameters action, String type, Object object, Object auxiliary)
+    public Command(Case action, String type, Object object, Object auxiliary)
     {
         this.action = action;
         this.type = type;
@@ -25,12 +26,12 @@ public class Command
         this.auxiliary = auxiliary;
     }
 
-    public ActionParameters getAction()
+    public Case getAction()
     {
         return action;
     }
 
-    public void setAction(ActionParameters action)
+    public void setAction(Case action)
     {
         this.action = action;
     }

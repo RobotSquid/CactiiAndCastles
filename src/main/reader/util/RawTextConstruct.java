@@ -22,10 +22,15 @@ public class RawTextConstruct
         this.constructs = new ArrayList<>();
         this.values = getValues(raw);
 
-        getSubObjects(raw).stream().forEach(a -> constructs.add(new RawTextConstruct(a)));
+        getSubObjects(raw).forEach(a -> constructs.add(new RawTextConstruct(a)));
     }
 
     public RawTextConstruct(String path)
+    {
+        this(getData(path));
+    }
+
+    private static ArrayList<String> getData(String path)
     {
         ArrayList<String> data = new ArrayList<>();
         try
@@ -43,17 +48,13 @@ public class RawTextConstruct
             }
             textReader.close();
 
-            this.raw = data;
-
-            this.constructs = new ArrayList<>();
-            this.values = getValues(data);
-
-            getSubObjects(data).stream().forEach(a -> constructs.add(new RawTextConstruct(a)));
+            return data;
         }
         catch (Exception e)
         {
             System.out.println("Couldn't load construct, " + e.getMessage());
         }
+        return null;
     }
 
     public HashMap<String, String> getValues()

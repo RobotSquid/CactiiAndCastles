@@ -1,26 +1,44 @@
 package main.game;
 
+import main.game.util.ConstructableObject;
+import main.reader.util.BuildConstruct;
+import main.reader.util.RawTextConstruct;
+
 import java.lang.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
-public class Room
+public class Room extends ConstructableObject
 {
-    private String name;
+    private String name = "Some Unnamed Room";
     private ArrayList<Object> objects = new ArrayList<Object>();
     //private HashMap doors = new HashMap<Room, Connection>();
 
-    public Room()
+    @Override
+    public HashMap<String, BiConsumer<ConstructableObject, String>> fieldConsumers()
     {
-        name = "Some Unnamed Room";
-        objects = new ArrayList();
+        return new HashMap<String, BiConsumer<ConstructableObject, String>>()
+        {{
+            put("name", (r, s) -> ((Room) r).setName(s));
+        }};
     }
 
-    public Room(String s, ArrayList o/*, HashMap d*/)
+    @Override
+    public BiConsumer<ConstructableObject, ArrayList<ConstructableObject>> objectConsumer()
     {
-        name = s;
-        objects = o;
-        //doors = d;
+        return (r, a) -> ((Room) r).setObjects(a.stream().map(o -> ((Object) o)).collect(Collectors.toCollection(ArrayList::new)));
+    }
+
+    public Room(BuildConstruct construct)
+    {
+        super(construct);
+    }
+
+    public Room()
+    {
+        this(null);
     }
 
     public String getName()

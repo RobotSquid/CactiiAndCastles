@@ -1,15 +1,45 @@
 package main.game;
 
+import main.game.util.ConstructableObject;
+import main.reader.util.BuildConstruct;
+import main.reader.util.RawTextConstruct;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class Castle
+public class Castle extends ConstructableObject
 {
-
     private String welcome = "";
     private ArrayList<Room> rooms = new ArrayList<Room>();
-    //private ArrayList connections = new ArrayList<Connection>();
 
-    public Castle() {}
+    @Deprecated
+    public Castle()
+    {
+        this(null);
+    }
+
+    @Override
+    public HashMap<String, BiConsumer<ConstructableObject, String>> fieldConsumers()
+    {
+        return new HashMap<String, BiConsumer<ConstructableObject, String>>()
+        {{
+            put("welcome", (c, s) -> ((Castle) c).setWelcome(s));
+        }};
+    }
+
+    @Override
+    public BiConsumer<ConstructableObject, ArrayList<ConstructableObject>> objectConsumer()
+    {
+        return (c, a) -> ((Castle) c).setRooms(a.stream().map(o -> ((Room) o)).collect(Collectors.toCollection(ArrayList::new)));
+    }
+
+    public Castle(BuildConstruct construct)
+    {
+        super(construct);
+    }
 
     public ArrayList<Room> getRooms()
     {

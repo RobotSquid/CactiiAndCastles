@@ -47,8 +47,11 @@ public class GameApp extends JFrame
         this.setVisible(true);
     }
 
-    public void println(String s)
+    /**
+     * @param string String to print to the game console
+     */
+    public void println(String string)
     {
-        out.append(s + "\n");
+        out.append(string + "\n");
     }
 }

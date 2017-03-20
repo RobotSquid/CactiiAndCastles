@@ -5,6 +5,7 @@ import com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import main.game.Object;
 import main.game.Player;
+import main.game.util.ConstructableObject;
 
 import java.text.NumberFormat;
 import java.util.Arrays;

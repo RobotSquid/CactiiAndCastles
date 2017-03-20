@@ -1,28 +1,49 @@
 package main.game;
 
-import main.game.util.Action;
+import main.game.util.ConstructableObject;
+import main.reader.util.BuildConstruct;
+import main.reader.util.RawTextConstruct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
-public class Object
+public class Object extends ConstructableObject
 {
-    private String name;
+    private String name = "Some Unnamed Object";
     private boolean existsInWorld = true;
     private boolean visible = true;
 
     private HashMap data = new HashMap<String, String>();
     private ArrayList<Action> actions = new ArrayList<>();
 
-    public Object()
+    @Override
+    public HashMap<String, BiConsumer<ConstructableObject, String>> fieldConsumers()
     {
-        name = "Some Unnamed Object";
+        return new HashMap<String, BiConsumer<ConstructableObject, String>>()
+        {{
+            put("name", (o, s) -> ((Object) o).setName(s));
+            put("visible", (o, s) -> ((Object) o).setVisible(Boolean.valueOf(s)));
+            put("default", (o, s) -> {String[] args = s.split(",");((Object) o).data.put(args[0], args[1]);});
+        }};
     }
 
-    public Object(String s, ArrayList<Action> h)
+    @Override
+    public BiConsumer<ConstructableObject, ArrayList<ConstructableObject>> objectConsumer()
     {
-        name = s;
-        actions = h;
+        return (ob, a) -> ((Object) ob).setActions(a.stream().map(o -> ((Action) o)).collect(Collectors.toCollection(ArrayList::new)));
+    }
+
+    public Object(BuildConstruct construct)
+    {
+        super(construct);
+    }
+
+    @Deprecated
+    public Object()
+    {
+        super(null);
     }
 
     public String getName()
