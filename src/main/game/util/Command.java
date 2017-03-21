@@ -64,6 +64,6 @@ public class Command
     {
         SHOW_OBJECTS,
         STATISTICS,
-        USER_DEFINED
+        LOAD_MAP, USER_DEFINED
     }
 }

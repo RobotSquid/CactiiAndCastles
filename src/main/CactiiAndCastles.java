@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class CactiiAndCastles
 {
-    private static final String mapPath = "C:\\Projects\\CactiiAndCastles\\map\\default.castle";
+    private static final String mapPath = "C:\\CactiiAndCastles\\map\\default.castle";
 
     public static Castle castle;
     private static Player player;
@@ -22,9 +22,8 @@ public class CactiiAndCastles
 
     public static void main(String[] args)
     {
-        castle = MapReader.getCastle(mapPath);
-        player = new Player(800, 200, castle.getRooms().get(0), null, new ArrayList<>());
-        SwingUtilities.invokeLater(() -> {app = new GameApp();app.println(castle.getWelcome());app.println("");});
+        player = new Player(800, 200, null, null, new ArrayList<>());
+        SwingUtilities.invokeLater(() -> app = new GameApp());
     }
 
     public static void handleInput(String s)
@@ -36,6 +35,20 @@ public class CactiiAndCastles
         {
             switch (command.getType())
             {
+                case LOAD_MAP:
+                    String path = s.replaceFirst("(?i).* castle \\s*", "");
+                    try
+                    {
+                        castle = MapReader.getCastle(path);
+                        player.setCurrentRoom(castle.getRooms().get(0));
+                        app.println(castle.getWelcome());
+                        app.println("");
+                    }
+                    catch (Exception e)
+                    {
+                        app.println("Couldn't load that castle");
+                    }
+                    break;
                 case SHOW_OBJECTS:
                 {
                     String pr = "You look around the room. You see the following objects: " + String.join(", ", player.getCurrentRoom().getObjects().stream().filter(Object::isVisible).map(Object::getName).toArray(String[]::new));

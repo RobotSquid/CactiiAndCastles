@@ -31,6 +31,10 @@ public class InputReader
         // CHECK STATS
         specialActions.put("stats", Command.ActionType.STATISTICS);
         specialActions.put("contemplate", Command.ActionType.STATISTICS);
+
+        //LOAD FILE
+        specialActions.put("load castle", Command.ActionType.LOAD_MAP);
+        specialActions.put("open castle", Command.ActionType.LOAD_MAP);
     }
 
     public static Command parseInput(String s, Player player)
