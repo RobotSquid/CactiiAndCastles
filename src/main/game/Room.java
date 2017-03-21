@@ -1,6 +1,7 @@
 package main.game;
 
 import main.game.util.ConstructableObject;
+import main.reader.InputReader;
 import main.reader.util.BuildConstruct;
 import main.reader.util.RawTextConstruct;
 
@@ -8,6 +9,7 @@ import java.lang.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Room extends ConstructableObject
@@ -21,7 +23,7 @@ public class Room extends ConstructableObject
     {
         return new HashMap<String, BiConsumer<ConstructableObject, String>>()
         {{
-            put("name", (r, s) -> ((Room) r).setName(s));
+            put("name", (r, s) -> {((Room) r).setName(s);InputReader.roomNames.put(s, ((Room) r));});
         }};
     }
 
@@ -33,12 +35,12 @@ public class Room extends ConstructableObject
 
     public Room(BuildConstruct construct)
     {
-        super(construct);
+        initialize(construct);
     }
 
     public Room()
     {
-        this(null);
+
     }
 
     public String getName()

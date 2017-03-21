@@ -1,8 +1,9 @@
 package main.game;
 
+import main.game.util.Command;
 import main.game.util.ConstructableObject;
+import main.reader.InputReader;
 import main.reader.util.BuildConstruct;
-import main.reader.util.RawTextConstruct;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,14 +32,11 @@ public class Action extends ConstructableObject
     }
 
     @Deprecated
-    public Action()
-    {
-        this(null);
-    }
+    public Action() {}
 
     public Action(BuildConstruct construct)
     {
-        super(construct);
+        initialize(construct);
     }
 
     public ArrayList<String> getSynonyms()
@@ -60,4 +58,5 @@ public class Action extends ConstructableObject
     {
         this.cases = cases;
     }
+
 }

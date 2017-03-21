@@ -40,13 +40,13 @@ public class Case extends ConstructableObject
 
     public Case(BuildConstruct construct)
     {
-        super(construct);
+        initialize(construct);
     }
 
     @Deprecated
     public Case()
     {
-        super(null);
+
     }
 
     public int getHealth()

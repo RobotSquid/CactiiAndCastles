@@ -1,54 +1,79 @@
 package main.reader;
 
 import main.CactiiAndCastles;
+import main.game.*;
 import main.game.Object;
-import main.game.Player;
-import main.game.Room;
 import main.game.util.Command;
+import main.helper.ArrayHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.StringJoiner;
+import java.util.function.Predicate;
 
 public class InputReader
 {
     public static HashMap<String, Room> roomNames = new HashMap<>();
-    public static HashMap<String, String> actionNames = new HashMap<>();
     public static HashMap<String, Object> objectNames = new HashMap<>();
+
+    public static HashMap<String, Object> oaObjects = new HashMap<>();
+    public static HashMap<String, Action> oaActions = new HashMap<>();
+
+    private static HashMap<String, Command.ActionType> specialActions = new HashMap<>();
 
     static
     {
         // CHECK OBJECTS
-        actionNames.put("objects", "objects");
-        actionNames.put("look around", "objects");
-        actionNames.put("observe", "objects");
+        specialActions.put("objects", Command.ActionType.SHOW_OBJECTS);
+        specialActions.put("look around", Command.ActionType.SHOW_OBJECTS);
+        specialActions.put("observe", Command.ActionType.SHOW_OBJECTS);
 
         // CHECK STATS
-        actionNames.put("stats", "stats");
-        actionNames.put("contemplate", "stats");
+        specialActions.put("stats", Command.ActionType.STATISTICS);
+        specialActions.put("contemplate", Command.ActionType.STATISTICS);
     }
 
     public static Command parseInput(String s, Player player)
     {
-        //TODO: Add local objects, actions generation
-
         Command c = new Command();
 
-        String action = findMatch(s, actionNames.keySet());
+        String action = findMatch(new ArrayList<>(specialActions.keySet()), s);
         if (action != null)
         {
-            c.setType(actionNames.get(action));
+            c.setType(specialActions.get(action));
+            return c;
+        }
+        else
+        {
+            c.setType(Command.ActionType.USER_DEFINED);
 
-            s = removeFirst(action, s);
-            String object = findMatch(s, objectNames.keySet());
-            if (object != null)
+            String finalS = s;
+            Predicate searcher = is ->
             {
-                if ((player.getCurrentRoom().getObjects().contains(objectNames.get(object)) && objectNames.get(object).isVisible()) || player.getInventory().contains(objectNames.get(object)))
-                {
-                    c.setObject(objectNames.get(object));
+                String[] parts = ((String) is).split("<-");
+                return finalS.matches("(?i).*" + parts[0] + ".*" + parts[1] + ".*");
+            };
+            String os = ((String) ArrayHelper.getFirstSatisfy(new ArrayList<>(oaObjects.keySet()), searcher));
+            String as = ((String) ArrayHelper.getFirstSatisfy(new ArrayList<>(oaActions.keySet()), searcher));
 
-                    s = removeFirst(object, s);
-                    String aux = findMatch(s, objectNames.keySet());
+            removeFirst(os + ".*" + as, s);
+
+            if (os != null)
+            {
+                if ((player.getCurrentRoom().getObjects().contains(oaObjects.get(os)) && oaObjects.get(os).isVisible()) || player.getInventory().contains(oaObjects.get(os)))
+                {
+
+                    c.setObject(oaObjects.get(os));
+/*
+                    ArrayList<String> possibleVerbs = new ArrayList<>();
+                    c.getObject().getActions().forEach(a -> a.getSynonyms().forEach(possibleVerbs::add));
+                    action = findMatch(s, possibleVerbs);*/
+
+                        /*
+                        s = removeFirst(action, s);
+                        s = removeFirst(object, s);*/
+
+                    String aux = findMatch(new ArrayList<>(objectNames.keySet()), s);
                     if (aux != null)
                     {
                         if ((player.getCurrentRoom().getObjects().contains(objectNames.get(aux)) && objectNames.get(aux).isVisible()) || player.getInventory().contains(objectNames.get(aux)))
@@ -60,51 +85,49 @@ public class InputReader
                             CactiiAndCastles.println("What Object?");
                         }
                     }
+                }
+            }
+            else
+            {
+                CactiiAndCastles.println("What object?");
+            }
 
-                    /*if (c.getObject().getActions().containsKey(actionNames.get(action)))
+            if (as != null)
+            {
+
+                Action a = oaActions.get(as);
+
+                if (a != null)
+                {
+                    Case cse = ((Case) ArrayHelper.getFirstSatisfy(a.getCases(), c1 -> ((Case) c1).getCondition().evaluate(player, c.getObject(), c.getAuxiliary())));
+                    if (cse != null)
                     {
-                        ArrayList<ActionParameters> apList = c.getObject().getActions().get(actionNames.get(action)).getCases();
-
-                        int i;
-                        for (i = 0; i < apList.size() && !apList.get(i).getCondition().evaluate(player, c.getObject(), c.getAuxiliary()); i++) {}
-
-                        if (i < apList.size() && apList.get(i).getCondition().evaluate(player, c.getObject(), c.getAuxiliary()))
-                        {
-                            c.setAction(apList.get(i));
-                        }
-                        else
-                        {
-                            CactiiAndCastles.println("You can't do that to the poor object!");
-                        }
+                        System.out.println(cse.getCondition().getLiteral());
+                        c.setAction(cse);
+                        return c;
                     }
                     else
                     {
-                        CactiiAndCastles.println("You can't do that to the poor object!");
-                    }*/
+                        CactiiAndCastles.println("At this moment you can't do that to the poor object!");
+                    }
                 }
                 else
                 {
-                    CactiiAndCastles.println("What object?");
+                    CactiiAndCastles.println("This is not something you can do that to the poor object!");
                 }
             }
-
-            return c;
-        }
-        else
-        {
-            CactiiAndCastles.println("Sorry, what do you want to do again?");
+            else
+            {
+                CactiiAndCastles.println("What did you want to do again?");
+            }
         }
 
         return null;
     }
 
-    private static String findMatch(String s, Set<String> ba)
+    private static String findMatch(ArrayList<String> ba, String s)
     {
-        ArrayList<String> a = new ArrayList<>(ba);
-        boolean b = false;
-        int i;
-        for (i = -1; i < a.size()-1 && !b; i++) {b = s.matches("(?i).*" + a.get(i+1) + ".*");}
-        return b ? a.get(i) : null;
+        return ((String) ArrayHelper.getFirstSatisfy(ba, is -> s.matches("(?i).*" + is.toString() + ".*")));
     }
 
     private static String removeFirst(String s, String se)

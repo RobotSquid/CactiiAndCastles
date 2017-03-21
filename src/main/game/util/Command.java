@@ -6,19 +6,13 @@ import main.game.Object;
 public class Command
 {
     private Case action;
-    private String type;
+    private ActionType type;
     private Object object;
     private Object auxiliary;
 
-    public Command()
-    {
-        this.action = new Case();
-        this.type = null;
-        this.object = new Object();
-        this.auxiliary = null;
-    }
+    public Command() {}
 
-    public Command(Case action, String type, Object object, Object auxiliary)
+    public Command(Case action, ActionType type, Object object, Object auxiliary)
     {
         this.action = action;
         this.type = type;
@@ -36,12 +30,12 @@ public class Command
         this.action = action;
     }
 
-    public String getType()
+    public ActionType getType()
     {
         return type;
     }
 
-    public void setType(String type)
+    public void setType(ActionType type)
     {
         this.type = type;
     }
@@ -64,5 +58,12 @@ public class Command
     public void setAuxiliary(Object auxiliary)
     {
         this.auxiliary = auxiliary;
+    }
+
+    public enum ActionType
+    {
+        SHOW_OBJECTS,
+        STATISTICS,
+        USER_DEFINED
     }
 }

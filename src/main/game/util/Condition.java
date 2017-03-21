@@ -32,6 +32,7 @@ public class Condition
 
     public boolean evaluate(Player player, Object object, Object auxiliary)
     {
+        //System.out.println(literal);
         if (literal.equals("default"))
         {
             return true;
@@ -109,6 +110,8 @@ public class Condition
             //System.out.println(sLit);
             String simple = simplifyString(sLit);
 
+            //System.out.println(literal + "-> " + evalLit + ": " + simple);
+
             return Boolean.parseBoolean(simple);
         }
     }
@@ -149,9 +152,10 @@ public class Condition
     private String replacement(String group, Player player, Object object, Object auxiliary)
     {
         //System.out.println("======" + group);
-        String[] params = group.split("\\.", 2);
+        //System.out.println(object.getName());
+        String[] params = group.substring(1, group.length()-1).split("\\.", 2);
+        //Arrays.stream(params).forEach(p -> System.out.println(p));
         Object thing = params[0].equalsIgnoreCase("object") ? object : (params[0].equalsIgnoreCase("auxiliary") ? auxiliary : null);
-
         if (thing != null)
         {
             if (params.length == 1)

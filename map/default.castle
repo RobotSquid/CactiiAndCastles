@@ -17,6 +17,7 @@ welcome:Hi Player, Welcome to the Default Testing Castle! Take a look around and
             action:pickup,pick up,grab,obtain
             defined:pickup
             [
+                defined:pickup_at_object
                 happiness:1
                 string:You pick up the {object}. You see a worm crawl inside
                 command:ati {object}
@@ -52,6 +53,7 @@ welcome:Hi Player, Welcome to the Default Testing Castle! Take a look around and
         [
             extends:pickup
             [
+                extends:pickup_at_object
                 happiness:100
                 string:You pick up the {object} and stroke it
                 case:{player.object}={object}
@@ -62,7 +64,7 @@ welcome:Hi Player, Welcome to the Default Testing Castle! Take a look around and
         name:Useless Sword
         type:1
         [
-            action:pickup
+            extends:pickup
             [
                 happiness:20
                 string:You pick up the delicate sword and feel accomplished

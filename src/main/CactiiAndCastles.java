@@ -36,19 +36,19 @@ public class CactiiAndCastles
         {
             switch (command.getType())
             {
-                case "objects":
+                case SHOW_OBJECTS:
                 {
                     String pr = "You look around the room. You see the following objects: " + String.join(", ", player.getCurrentRoom().getObjects().stream().filter(Object::isVisible).map(Object::getName).toArray(String[]::new));
                     println(pr);
                     break;
                 }
-                case "stats":
+                case STATISTICS:
                 {
                     String pr = String.format("You sit back and think for a while. You have %d health, and %d happiness. You are currently in %s%s. %s", player.getHealth(), player.getHappiness(), player.getCurrentRoom().getName(), player.getCurrentObject() != null ? ", at the " + player.getCurrentObject().getName() : "", player.getInventory().size() > 0 ? "Your inventory contains the following objects: " + String.join(", ", player.getInventory().stream().map(Object::getName).toArray(String[]::new)) : " You aren't carrying any objects");
                     println(pr);
                     break;
                 }
-                default:
+                case USER_DEFINED:
                     command.getAction().getString().say(command.getObject(), command.getAuxiliary());
                     player.changeHappiness(command.getAction().getHappiness());
                     player.changeHealth(command.getAction().getHealth());

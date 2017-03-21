@@ -18,7 +18,7 @@ public class Castle extends ConstructableObject
     @Deprecated
     public Castle()
     {
-        this(null);
+
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Castle extends ConstructableObject
 
     public Castle(BuildConstruct construct)
     {
-        super(construct);
+        initialize(construct);
     }
 
     public ArrayList<Room> getRooms()

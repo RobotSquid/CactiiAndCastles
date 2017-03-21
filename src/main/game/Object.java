@@ -1,6 +1,7 @@
 package main.game;
 
 import main.game.util.ConstructableObject;
+import main.reader.InputReader;
 import main.reader.util.BuildConstruct;
 import main.reader.util.RawTextConstruct;
 
@@ -15,7 +16,7 @@ public class Object extends ConstructableObject
     private boolean existsInWorld = true;
     private boolean visible = true;
 
-    private HashMap data = new HashMap<String, String>();
+    private HashMap<String, String> data = new HashMap<String, String>();
     private ArrayList<Action> actions = new ArrayList<>();
 
     @Override
@@ -23,27 +24,31 @@ public class Object extends ConstructableObject
     {
         return new HashMap<String, BiConsumer<ConstructableObject, String>>()
         {{
-            put("name", (o, s) -> ((Object) o).setName(s));
+            put("name", (o, s) -> {((Object) o).setName(s);InputReader.objectNames.put(s, ((Object) o));});
             put("visible", (o, s) -> ((Object) o).setVisible(Boolean.valueOf(s)));
-            put("default", (o, s) -> {String[] args = s.split(",");((Object) o).data.put(args[0], args[1]);});
+            put("default", (o, s) -> {String[] args = s.split(",");((Object) o).getData().put(args[0], args[1]);});
         }};
     }
 
     @Override
     public BiConsumer<ConstructableObject, ArrayList<ConstructableObject>> objectConsumer()
     {
-        return (ob, a) -> ((Object) ob).setActions(a.stream().map(o -> ((Action) o)).collect(Collectors.toCollection(ArrayList::new)));
+        return (ob, a) ->
+        {
+            ((Object) ob).setActions(a.stream().map(o -> ((Action) o)).collect(Collectors.toCollection(ArrayList::new)));
+            ((Object) ob).getActions().forEach(ia -> ia.getSynonyms().forEach(sy -> {String key = sy + "<-" + ((Object) ob).getName(); InputReader.oaActions.put(key, ia);InputReader.oaObjects.put(key, ((Object) ob));}));
+        };
     }
 
     public Object(BuildConstruct construct)
     {
-        super(construct);
+        initialize(construct);
     }
 
     @Deprecated
     public Object()
     {
-        super(null);
+
     }
 
     public String getName()
@@ -68,6 +73,10 @@ public class Object extends ConstructableObject
 
     public HashMap<String, String> getData()
     {
+        if (data == null)
+        {
+            data = new HashMap<>();
+        }
         return data;
     }
 

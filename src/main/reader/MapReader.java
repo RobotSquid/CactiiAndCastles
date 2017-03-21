@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 public class MapReader
 {
+    public static final ArrayList<String> NOT_USED = new ArrayList<String>(Arrays.asList(new String[] {"defined", "extends"}));
+
     public static Castle getCastle(String path)
     {
         RawTextConstruct castle = new RawTextConstruct(path);
@@ -27,12 +29,14 @@ public class MapReader
 
         HashMap<ExtendingConstruct, ConstructableObject> realCastles = buildObjects(rawCastles, builders);
 
-        return ((Castle) ((ArrayList) realCastles.values()).get(0));
+        Castle realCastle = ((Castle) new ArrayList<>(realCastles.values()).get(0));
+
+        return realCastle;
     }
 
     private static HashMap<ExtendingConstruct, ConstructableObject> buildObjects(ArrayList<RawTextConstruct> raw, ArrayList<Function<BuildConstruct, ConstructableObject>> builders)
     {
-        return buildConstructs(raw, builders.get(0), builders.size() != 0 ? buildObjects(allSubObjects(raw), ((ArrayList<Function<BuildConstruct, ConstructableObject>>) builders.subList(1, builders.size()))) : null);
+        return buildConstructs(raw, builders.get(0), builders.size() > 1 ? buildObjects(allSubObjects(raw),  new ArrayList<>(builders.subList(1, builders.size()))) : null);
     }
 
     private static ArrayList<RawTextConstruct> allSubObjects(ArrayList<RawTextConstruct> parents)
@@ -61,9 +65,9 @@ public class MapReader
         //SORT
         rawConstructs.sort((o1, o2) -> constructs.get(o2).getDepth() < constructs.get(o1).getDepth() ? -1 : (constructs.get(o1).getDepth() < constructs.get(o2).getDepth() ? 1 : 0));
         //INHERIT
-        rawConstructs.forEach(r -> constructs.get(r).extendParent(new ArrayList<>(children.keySet())));
+        constructs.values().forEach(r -> r.extendParent(children != null ? new ArrayList<>(children.keySet()) : null));
         //BUILD
-        rawConstructs.forEach(r -> built.put(constructs.get(r), constructs.get(r).buildOut(children)));
+        constructs.values().forEach(r -> built.put(r, r.buildOut(children)));
 
         return built;
     }
